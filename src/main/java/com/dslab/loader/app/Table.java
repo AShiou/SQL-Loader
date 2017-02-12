@@ -14,13 +14,18 @@ import java.util.List;
  * @author Shiou
  */
 public class Table {
+  private final String tableName;
   private final String priKey;
   private final List<Schema> schema;
   
-  public Table(DBClient sourceDB) throws SQLException {
-    
+  public Table(String tableName, DBClient sourceDB) throws SQLException {
+    this.tableName = tableName;
     this.priKey = sourceDB.getPriKey();
     this.schema = sourceDB.getSchema();
+  }
+  
+  public String getTableName() {
+    return tableName;
   }
   
   public String getPriKey() {
@@ -28,7 +33,6 @@ public class Table {
   }
   
   public List<Schema> getSchema() {
-    
     return schema;
   }
 }

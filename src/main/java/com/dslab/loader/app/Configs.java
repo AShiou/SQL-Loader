@@ -27,10 +27,9 @@ public class Configs {
   public static final String SOURCE_DATABASE_DBNAME = "source.mysql.dbname";
   public static final String SOURCE_DATABASE_URL = "source.mysql.url";
   public static final String TARGET_DATABASE_URL ="target.phoenix.url";
-  //public static final String TASK_NUMBER = "task.number";
+  public static final String TASK_SIZE = "task.size";
   public static final String READ_THREAD = "read.thread";
   public static final String WRITE_THREAD = "write.thread";
-  public static final String BLOCK_SIZE = "block.size";
   public static final String BLOCK_NUMBER = "block.number";
  
   public Configs(String propFileName) throws IOException {
@@ -60,9 +59,9 @@ public class Configs {
     return prop.getProperty(TARGET_DATABASE_URL);
   }
   
-  /*public int getTaskNum() {
-    return Integer.parseInt(prop.getProperty(TASK_NUMBER));
-  }*/
+  public int getTaskSize() {
+    return Integer.parseInt(prop.getProperty(TASK_SIZE));
+  }
   
   public int getReadThread() {
     return Integer.parseInt(prop.getProperty(READ_THREAD));
@@ -70,10 +69,6 @@ public class Configs {
   
   public int getWriteThread() {
     return Integer.parseInt(prop.getProperty(WRITE_THREAD));
-  }
-  
-  public int getBlockSize() {
-    return Integer.parseInt(prop.getProperty(BLOCK_SIZE));
   }
   
   public int getBlockNumber() {

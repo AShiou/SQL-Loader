@@ -30,12 +30,8 @@ import org.apache.commons.logging.LogFactory;
  * @author Shiou
  */
 public class DBClient implements Closeable{
-    private static final Log LOG
-            = LogFactory.getLog(DBClient.class);
-  //private static final Log LOG = LogFactory.getLog(SQLConnect.class);
+  private static final Log LOG = LogFactory.getLog(DBClient.class);
   private String tableName;
-  
-  
   private static Connection con = null;
   private static Statement stmt = null;
   private static DatabaseMetaData md;
@@ -64,7 +60,7 @@ public class DBClient implements Closeable{
   public int getSqlCount() throws SQLException {
     ResultSet rs = stmt.executeQuery("select count(*) from "+tableName);
     while (rs.next()) {
-      LOG.info("Total column : "+rs.getInt(1));
+      LOG.info("Table Name : "+tableName+" Total column : "+rs.getInt(1));
       return rs.getInt(1);
     }
     return -1;
@@ -138,8 +134,7 @@ public class DBClient implements Closeable{
           GramPost.append("\"");
           GramPost.append(colName);
           GramPost.append("\"");
-          System.out.println(colName);
-          System.out.println("noooooooooooooooo");
+          //System.out.println(colName);
         }
         else {
           GramPost.append(colName);
@@ -149,12 +144,8 @@ public class DBClient implements Closeable{
         GramPost.append(",");
       }
     }
-    //if(GramPost.length() >= 1)
-    //  GramPost.setLength(GramPost.length()-1);
     GramPost.setCharAt(GramPost.length()-1,')');
     String Gram = GramPre.toString() + GramKey.toString() + GramPost.toString();
-    //Gram = Gram.substring(0,Gram.length()-1);
-    //Gram = Gram + ")";
     LOG.info(Gram);
     /*if(splitNum!=0) {
       Gram = Gram + "SALT_BUCKETS=" + splitNum;
@@ -184,7 +175,11 @@ public class DBClient implements Closeable{
         Schema next = schemaList.next();
         //String colName = next.getColName();
         String value = rs.getString(next.getColName());
-        if(next.getColType().compareTo("BOOLEAN") == 0) {
+        if(next.getColType().compareTo("VARCHAR") == 0) {
+          gram.append("'");
+          gram.append(value);
+          gram.append("'");
+        }else if(next.getColType().compareTo("BOOLEAN") == 0) {
           if(value.compareTo("0") == 0) {
             gram.append("FALSE");
           }
@@ -198,10 +193,7 @@ public class DBClient implements Closeable{
         gram.append(",");
       }
       gram.setCharAt(gram.length()-1,')');
-      //gram.append(";");
-      String upsertSql = gram.toString();
-      System.out.println(upsertSql);
-      contentList.add(upsertSql);
+      contentList.add(gram.toString());
     }
     return contentList;
   }
@@ -212,9 +204,8 @@ public class DBClient implements Closeable{
       stmt.executeUpdate(writeSqlList.next());
       con.commit();
     }
-    //stmt.executeUpdate("CREATE TABLE ttt(id INTEGER PRIMARY KEY,pathid INTEGER,xtl INTEGER,ytl INTEGER,xbr INTEGER,ybr INTEGER,frame INTEGER,occluded BOOLEAN,outside BOOLEAN)");
-    //con.commit();
-//rs = stmt.executeQuery("UPSERT INTO ttt VALUES(25,5,377,202,442,338,19,FALSE,FALSE)");
+  //stmt.executeQuery("UPSERT INTO ttt VALUES(25,5,377,202,442,338,19,FALSE,FALSE)");
+  //con.commit();
     
   }
   

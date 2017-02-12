@@ -15,10 +15,20 @@ import java.util.List;
  *
  * @author Shiou
  */
-public class Task {
-  
-  public Task () throws SQLException {
- 
+public class TableTask {
+  private final Table tableInfo;
+  private final List<String> taskSqlList;
+
+  public TableTask (Table tableInfo, List<String> taskList) throws SQLException {
+    this.tableInfo = tableInfo;
+    this.taskSqlList = taskList;
   }
   
+  public Table getTableInfo() {
+    return tableInfo;
+  }
+  
+  public List<String> getTaskSqlList() {
+    return taskSqlList;
+  }
 }
