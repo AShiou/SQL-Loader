@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dslab.loader.DBClient;
+package com.dsclab.loader.validate;
 
-import com.dslab.loader.app.Keyword;
-import com.dslab.loader.app.Schema;
-import com.dslab.loader.app.Table;
+import com.dsclab.loader.loader.Keyword;
+import com.dsclab.loader.loader.Schema;
+import com.dsclab.loader.validate.Table;
 import java.io.Closeable;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -32,10 +33,10 @@ import org.apache.commons.logging.LogFactory;
 public class DBClient implements Closeable{
   private static final Log LOG = LogFactory.getLog(DBClient.class);
   private String tableName;
-  private static Connection con = null;
-  private static Statement stmt = null;
-  private static DatabaseMetaData md;
-  private static ResultSet resultSet;
+  private Connection con = null;
+  private Statement stmt = null;
+  private DatabaseMetaData md;
+  private ResultSet resultSet;
   
   public DBClient(final String url, final String driverClass) throws ClassNotFoundException, SQLException {
     if (driverClass != null) {
@@ -60,7 +61,7 @@ public class DBClient implements Closeable{
   public int getSqlCount() throws SQLException {
     ResultSet rs = stmt.executeQuery("select count(*) from "+tableName);
     while (rs.next()) {
-      LOG.info("Table Name : "+tableName+" Total column : "+rs.getInt(1));
+      LOG.info("Table Name:"+tableName+" , Total column:"+rs.getInt(1));
       return rs.getInt(1);
     }
     return -1;
@@ -71,15 +72,7 @@ public class DBClient implements Closeable{
     resultSet = con.getMetaData().getCatalogs();
     resultSet = md.getColumns(null, null, tableName, "%");
     while (resultSet.next()) {
-      //System.out.println("Column Name of table " + table + " = "+ resultSet.getString(4) +" "+ resultSet.getString("DATA_TYPE"));
-      Schema schema = new Schema(resultSet.getInt("DATA_TYPE"),resultSet.getString(4));
-
-      /*if(tmp.getType().length() > 9) {     
-        if(tmp.getType().substring(0,9).equals("unsupport")) {
-        schema_tmp = new UnsupportedTable(table,tmp.getName(),tmp.getType());
-        break;        
-        }
-      }*/      
+      Schema schema = new Schema(resultSet.getInt("DATA_TYPE"),resultSet.getString(4));    
       tableSchema.add(schema);
      }
     return tableSchema;
@@ -104,7 +97,6 @@ public class DBClient implements Closeable{
       resultSet = md.getTables(database, null, "%", null);
       while (resultSet.next()) {
         tableList.add(resultSet.getString(3));
-        //System.out.println(rs.getString(3));
       }
     return tableList;
   }
@@ -134,7 +126,6 @@ public class DBClient implements Closeable{
           GramPost.append("\"");
           GramPost.append(colName);
           GramPost.append("\"");
-          //System.out.println(colName);
         }
         else {
           GramPost.append(colName);
@@ -157,23 +148,17 @@ public class DBClient implements Closeable{
     } catch (RuntimeException ex) {
       //LOG.error("Could not create table",ex);
     }
-    LOG.info("Success to create phoenix table.");
-    //System.out.println("success");
   }
   
-  public List<String> read (String readSQL, Table tableInfo) throws SQLException {
+  public List<String> readMySql (String readSQL, Table tableInfo) throws SQLException {
     ResultSet rs = stmt.executeQuery(readSQL);
-    LOG.info(readSQL);
     List<String> contentList= new ArrayList<>();
     while (rs.next()) {
       Iterator<Schema> schemaList = tableInfo.getSchema().iterator();
       StringBuilder gram = new StringBuilder();
-      gram.append("UPSERT INTO ");
-      gram.append(tableName);
-      gram.append(" VALUES(");
+      gram.append(" (");
       while (schemaList.hasNext()) {
         Schema next = schemaList.next();
-        //String colName = next.getColName();
         String value = rs.getString(next.getColName());
         if(next.getColType().compareTo("VARCHAR") == 0) {
           gram.append("'");
@@ -193,6 +178,41 @@ public class DBClient implements Closeable{
         gram.append(",");
       }
       gram.setCharAt(gram.length()-1,')');
+      //System.out.println(gram.toString());
+      contentList.add(gram.toString());
+    }
+    return contentList;
+  }
+  
+    public List<String> readPhoenix (String readSQL, Table tableInfo) throws SQLException {
+    ResultSet rs = stmt.executeQuery(readSQL);
+    List<String> contentList= new ArrayList<>();
+    while (rs.next()) {
+      Iterator<Schema> schemaList = tableInfo.getSchema().iterator();
+      StringBuilder gram = new StringBuilder();
+      gram.append(" (");
+      while (schemaList.hasNext()) {
+        Schema next = schemaList.next();
+        String value = rs.getString(next.getColName());
+        if(next.getColType().compareTo("VARCHAR") == 0) {
+          gram.append("'");
+          gram.append(value);
+          gram.append("'");
+        }else if(next.getColType().compareTo("BOOLEAN") == 0) {
+          if(value.compareTo("false") == 0) {
+            gram.append("FALSE");
+          }
+          else {
+            gram.append("TRUE");
+          }
+        }
+        else {
+          gram.append(value);
+        }
+        gram.append(",");
+      }
+      gram.setCharAt(gram.length()-1,')');
+      //System.out.println(gram.toString());
       contentList.add(gram.toString());
     }
     return contentList;
@@ -212,11 +232,26 @@ public class DBClient implements Closeable{
   @Override
   public void close() {
     try {
-      stmt.close();
-      con.close();
-      resultSet.close();
-    } catch (SQLException ex) {
-      Logger.getLogger(DBClient.class.getName()).log(Level.SEVERE, null, ex);
+      safeClose(resultSet);
+      safeClose(stmt);
+      safeClose(con);
+    } catch (Exception ex) {
+      LOG.error(ex);
     }
-  }  
+  }
+  private static void safeClose(AutoCloseable close) throws Exception {
+    if (close != null) {
+      close.close();
+    }
+  }
+  
+  public Statement getStatement() {
+    return stmt;
+  }
+  
+  public Connection getConnection() {
+    return con;
+  }
+  
 }
+

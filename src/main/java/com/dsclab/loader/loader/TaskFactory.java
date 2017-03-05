@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dslab.loader.app;
+package com.dsclab.loader.loader;
 
-import com.dslab.loader.DBClient.DBClient;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.Math.*;
+import java.util.LinkedList;
 /**
  *
  * @author dslab
@@ -33,11 +33,10 @@ public class TaskFactory {
     this.tableName = tableInfo.getTableName();
   }
   
-  public List<String> distributeTask() {
+  public LinkedList<String> distributeTask() {
     int offset = 0;
     int rowSum = rowCount;
-    List<String> list = new ArrayList<>();
-    System.out.println(taskNum);
+    LinkedList<String> list = new LinkedList<>();
     for(int i=1 ; i<= taskNum ; i++) {
       StringBuilder Gram = new StringBuilder();
       Gram.append("SELECT * FROM ");
@@ -51,7 +50,6 @@ public class TaskFactory {
         Gram.append(taskSize);
       offset = offset + taskSize;
       rowSum = rowSum - taskSize;
-      //System.out.println(Gram.toString());
       list.add(Gram.toString());
       //select * from XML3_devices_history order by 1 limit 189699
     }

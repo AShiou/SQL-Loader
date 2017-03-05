@@ -1,13 +1,14 @@
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dslab.loader.app;
+package com.dsclab.loader.loader;
 
-import com.dslab.loader.DBClient.DBClient;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -17,9 +18,9 @@ import java.util.List;
  */
 public class TableTask {
   private final Table tableInfo;
-  private final List<String> taskSqlList;
+  private final LinkedList<String> taskSqlList;
 
-  public TableTask (Table tableInfo, List<String> taskList) throws SQLException {
+  public TableTask (Table tableInfo, LinkedList<String> taskList) throws SQLException {
     this.tableInfo = tableInfo;
     this.taskSqlList = taskList;
   }
@@ -28,7 +29,7 @@ public class TableTask {
     return tableInfo;
   }
   
-  public List<String> getTaskSqlList() {
+  public LinkedList<String> getTaskSqlList() {
     return taskSqlList;
   }
 }

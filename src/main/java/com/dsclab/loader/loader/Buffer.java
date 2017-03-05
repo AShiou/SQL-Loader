@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dslab.loader.app;
+package com.dsclab.loader.loader;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -17,42 +18,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Shiou
  */
 public class Buffer {
-  private LinkedList list = new LinkedList();
-  private int maxSize;
-  private Lock lock = new ReentrantLock();
-  private Condition condition;
-  
-  public Lock getLock() {
-    return lock;
-  }
-  
-  public void setLock(Lock lock) {
-    this.lock = lock;
-  }
-  
-  public Condition getCondition() {
-    return condition;
-  }
-  
-  public void setCondition(Condition condition) {
-    this.condition = condition;
-  }
-  
-  public LinkedList getList() {
-    return list;
-  }
-  
-  public void setList(LinkedList list) {
-    this.list = list;
-  }
-  
-  public int getMaxSize() {
-    return maxSize;
-  }
-  
-  public void setMaxSize(int maxSize) {
-    this.maxSize = maxSize;
-  }
+  private final LinkedList list = new LinkedList();
+  private final int maxSize;
+  private final Lock lock = new ReentrantLock();
+  private final Condition condition;
   
   public Buffer(int maxSize) {
     super();
@@ -64,11 +33,9 @@ public class Buffer {
     lock.lock();
     try {
       while (list.size() >= maxSize) {
-        System.out.println(Thread.currentThread().getName()+" is full");
         this.condition.await();
       }
       list.addLast(content);
-      System.out.println(Thread.currentThread().getName() + " add");
       this.condition.signalAll();
     } catch (Exception e) {
       e.printStackTrace();
@@ -82,11 +49,9 @@ public class Buffer {
     List<String> content= null;
     try {
       while (list.size() <= 0) {
-        System.out.println(Thread.currentThread().getName()+" null");
         this.condition.await();
       }
-      list.removeFirst();
-      System.out.println(Thread.currentThread().getName() + " consume");
+      content = (List<String>) list.removeFirst();
       this.condition.signalAll();
     } catch (Exception e) {
       e.printStackTrace();
@@ -95,4 +60,5 @@ public class Buffer {
     }
     return content;
   }
+  
 }

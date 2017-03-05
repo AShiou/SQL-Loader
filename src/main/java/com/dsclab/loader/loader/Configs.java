@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dslab.loader.app;
+package com.dsclab.loader.loader;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class Configs {
 	throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
       }
     } catch (Exception e) {
-      System.out.println("Exception: " + e);
+      LOG.error(e);
     } finally {
       inputStream.close();
     }
